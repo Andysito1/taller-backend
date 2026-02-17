@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->id(); // Esto crea un BIGINT UNSIGNED AUTO_INCREMENT
+            $table->id();
             $table->string('nombre', 50);
             $table->timestamps();
         });

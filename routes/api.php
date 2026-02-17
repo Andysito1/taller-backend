@@ -22,7 +22,6 @@ Route::middleware(['auth:sanctum', 'role:ADMIN'])->group(function () {
     Route::middleware('role:ADMIN')->group(function () {
 
         Route::post('/ordenes', [OrdenServicioController::class, 'store']);
-        Route::get('/usuarios', [UsuarioController::class, 'index']);
         Route::post('/usuarios', [UsuarioController::class, 'store']);
         Route::put('/usuarios/{id}/toggle', [UsuarioController::class, 'toggleActivo']);
         Route::post('/ordenes', [OrdenServicioController::class, 'store']);
@@ -58,7 +57,9 @@ Route::middleware(['auth:sanctum', 'role:CLIENTE'])->group(function () {
         ]);
     });
 
-    Route::get('/mi-seguimiento', [OrdenServicioController::class, 'miSeguimiento']);
+    //Route::get('/mi-seguimiento', [OrdenServicioController::class, 'miSeguimiento']);
+    Route::get('/mis-vehiculos', [VehiculoController::class, 'misVehiculos']);
+    Route::get('/vehiculos/{id}/seguimiento', [OrdenServicioController::class, 'seguimientoVehiculo']);
 });
 
 Route::middleware(['auth:sanctum', 'role:ADMIN,MECANICO'])->group(function () {

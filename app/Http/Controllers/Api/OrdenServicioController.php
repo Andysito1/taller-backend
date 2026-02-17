@@ -80,6 +80,13 @@ class OrdenServicioController extends Controller
     public function updateEstado(Request $request, $id)
     {
         $orden = OrdenServicio::findOrFail($id);
+        
+        //Check if user is authenticated
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 401);
+        }
 
         $request->validate([
             'estado' => 'required|in:en_proceso,pausado,finalizado'
@@ -108,33 +115,65 @@ class OrdenServicioController extends Controller
     }
 
 
-    public function miSeguimiento(Request $request)
-    {
-        // Buscar cliente asociado al usuario logueado
-        $cliente = \App\Models\Cliente::where('id_usuario', $request->user()->id)->first();
+    // public function miSeguimiento(Request $request)
+    // {
+    //     // Buscar cliente asociado al usuario logueado
+    //     $cliente = \App\Models\Cliente::where('id_usuario', $request->user()->id)->first();
 
-        if (!$cliente) {
-            return response()->json([
-                'message' => 'Cliente no encontrado'
-            ], 404);
-        }
+    //     if (!$cliente) {
+    //         return response()->json([
+    //             'message' => 'Cliente no encontrado'
+    //         ], 404);
+    //     }
 
-        // Traer vehículos y sus órdenes
-        $vehiculos = \App\Models\Vehiculo::with(['ordenes'])
-            ->where('id_cliente', $cliente->id)
-            ->get();
+    //     // Traer vehículos y sus órdenes
+    //     $vehiculos = \App\Models\Vehiculo::with(['ordenes'])
+    //         ->where('id_cliente', $cliente->id)
+    //         ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $vehiculos
-        ]);
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $vehiculos
+    //     ]);
+    // }
 
     public function misOrdenes(Request $request)
     {
         $ordenes = \App\Models\OrdenServicio::with('vehiculo')
             ->where('id_mecanico', $request->user()->id)
             ->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'data' => $ordenes
+        ]);
+    }
+
+    public function seguimientoVehiculo($idVehiculo)
+    {
+        $user = auth()->user();
+
+        if ($user->rol !== 'CLIENTE') {
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 403);
+        }
+
+        // Verificar que el vehículo le pertenezca
+        $vehiculo = Vehiculo::where('id', $idVehiculo)
+            ->where('id_cliente', $user->id)
+            ->first();
+
+        if (!$vehiculo) {
+            return response()->json([
+                'message' => 'Vehículo no encontrado o no pertenece al cliente'
+            ], 404);
+        }
+
+        $ordenes = OrdenServicio::where('id_vehiculo', $idVehiculo)
+            ->with('vehiculo')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
             'success' => true,

@@ -18,6 +18,32 @@ class VehiculoController extends Controller
         return response()->json($vehiculos);
     }
 
+    // Vehiculos del cliente para la vista cliente
+    public function misVehiculos()
+    {
+        //Check if user is authenticated
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 401);
+        }
+        $user = auth()->user();
+
+        if ($user->rol !== 'CLIENTE') {
+            return response()->json([
+                'message' => 'No autorizado'
+            ], 403);
+        }
+
+        $vehiculos = Vehiculo::where('id_cliente', $user->id)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $vehiculos
+        ]);
+    }
+
     // Crear vehículo
     public function store(Request $request)
     {

@@ -34,4 +34,13 @@ class Usuario extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'id_rol');
     }
+
+    public function getRolAttribute() {
+        switch($this->id_rol) {
+            case 3: return 'CLIENTE';
+            case 2: return 'MECANICO';
+            case 1: return 'ADMIN';
+             default: return 'DESCONOCIDO';
+        }
+    }
 }
